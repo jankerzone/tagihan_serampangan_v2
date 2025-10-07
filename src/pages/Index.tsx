@@ -118,6 +118,10 @@ const Index = () => {
   const [selectedBudgetItemForCategoryEdit, setSelectedBudgetItemForCategoryEdit] = useState<BudgetItem | null>(null);
   const [newCategoryForBudgetItem, setNewCategoryForBudgetItem] = useState('');
 
+  // New state for bulk realization
+  const [isBulkRealizationOpen, setIsBulkRealizationOpen] = useState(false);
+  const [bulkPercentage, setBulkPercentage] = useState(100);
+
   // Load data when month/year or global settings (e.g., language) changes
   useEffect(() => {
     const currentKey = getMonthKey(globalSettings.currentYear, globalSettings.currentMonth);
@@ -362,6 +366,36 @@ const Index = () => {
     } else {
       showError(t('requiredFields'));
     }
+  };
+
+  const handleBulkRealization = () => {
+    if (data.budgetingList.length === 0) {
+      showError(t('noExpensesToUpdate'));
+      return;
+    }
+
+    const percentage = parseFloat(String(bulkPercentage));
+    if (isNaN(percentage) || percentage < 0 || percentage > 100) {
+      showError(t('invalidPercentage'));
+      return;
+    }
+
+    const currentKey = getMonthKey(globalSettings.currentYear, globalSettings.currentMonth);
+    const updatedBudgetingList = data.budgetingList.map(item => ({
+      ...item,
+      realization: Math.round(item.allocation * (percentage / 100))
+    }));
+
+    const updatedData = {
+      ...data,
+      budgetingList: updatedBudgetingList
+    };
+
+    saveMonthData(currentKey, updatedData);
+    setData(updatedData);
+    showSuccess(t('bulkRealizationSuccess'));
+    setIsBulkRealizationOpen(false);
+    setBulkPercentage(100); // Reset percentage after applying
   };
 
   const handleDeleteItem = (type: 'income' | 'saving' | 'budget', id: string) => {
@@ -854,6 +888,58 @@ const Index = () => {
                           rows={10}
                         />
                         <Button onClick={handleBulkAddBudget} className="w-full">{t('bulkAddButton')}</Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+
+                  {/* Bulk Set Realization Button */}
+                  <Dialog open={isBulkRealizationOpen} onOpenChange={setIsBulkRealizationOpen}>
+                    <DialogTrigger asChild>
+                      <Button 
+                        size="sm" 
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                        disabled={data.budgetingList.length === 0}
+                      >
+                        <Edit3 className="h-4 w-4 mr-1" />
+                        {t('bulkSetRealization')}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>{t('bulkSetRealization')}</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <p className="text-sm text-gray-600">
+                          {t('setRealizationForAll', { count: data.budgetingList.length })}
+                        </p>
+                        <div>
+                          <Label htmlFor="bulkPercentage">{t('percentage')}</Label>
+                          <div className="flex items-center gap-2">
+                            <Input
+                              id="bulkPercentage"
+                              type="number"
+                              value={bulkPercentage}
+                              onChange={(e) => setBulkPercentage(parseFloat(e.target.value) || 0)}
+                              placeholder="100"
+                              min="0"
+                              max="100"
+                              className="w-full border rounded p-2"
+                            />
+                            <Button 
+                              size="sm" 
+                              onClick={() => setBulkPercentage(100)}
+                              className="bg-green-500 hover:bg-green-600 text-white text-sm"
+                            >
+                              {t('setTo100Percent')}
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="text-sm text-gray-600 italic">
+                          {t('allocationTotal')}: {formatCurrency(totalBudgetedExpenses)}
+                        </div>
+                        <Button onClick={handleBulkRealization} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                          {t('applyBulk')}
+                        </Button>
                       </div>
                     </DialogContent>
                   </Dialog>

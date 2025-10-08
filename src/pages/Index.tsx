@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { PlusCircle, Edit3, Trash2, Settings, LogOut, Upload } from 'lucide-react';
+import { PlusCircle, Edit3, Trash2, Settings, LogOut, Upload, Download } from 'lucide-react';
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { 
   getMonthKey, 
@@ -121,6 +121,9 @@ const Index = () => {
   // New state for bulk realization
   const [isBulkRealizationOpen, setIsBulkRealizationOpen] = useState(false);
   const [bulkPercentage, setBulkPercentage] = useState(100);
+
+  // Ref for the hidden file input
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load data when month/year or global settings (e.g., language) changes
   useEffect(() => {
@@ -456,6 +459,85 @@ const Index = () => {
     }
   };
 
+  const handleExport = () => {
+    try {
+      const currentKey = getMonthKey(globalSettings.currentYear, globalSettings.currentMonth);
+      const exportData = {
+        month: currentKey,
+        data: {
+          incomeSources: data.incomeSources,
+          savingList: data.savingList,
+          budgetingList: data.budgetingList,
+        },
+      };
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `tagihan-${currentKey}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showSuccess(t('exportSuccess'));
+    } catch (error) {
+      console.error('Error exporting data:', error);
+      showError(t('exportError'));
+    }
+  };
+
+  const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    if (file.size > 1024 * 1024) { // 1MB limit
+      showError(t('fileTooLarge'));
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const result = e.target?.result as string;
+        const imported = JSON.parse(result);
+
+        const currentKey = getMonthKey(globalSettings.currentYear, globalSettings.currentMonth);
+
+        if (imported.month !== currentKey) {
+          showError(t('fileMonthMismatch'));
+          return;
+        }
+
+        if (window.confirm(t('confirmOverwrite'))) {
+          const importedData: FinancialData = {
+            incomeSources: imported.data.incomeSources || [],
+            savingList: imported.data.savingList || [],
+            budgetingList: imported.data.budgetingList || [],
+          };
+
+          saveMonthData(currentKey, importedData);
+          setData(importedData); // Update local state
+          showSuccess(t('importSuccess'));
+        }
+      } catch (error) {
+        console.error('Error importing data:', error);
+        showError(t('invalidJsonFile'));
+      } finally {
+        // Reset file input to allow re-importing the same file
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      }
+    };
+    reader.readAsText(file);
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('currentUser');
@@ -558,7 +640,7 @@ const Index = () => {
           </CardContent>
         </Card>
 
-        {/* Data Management - Copy from Previous Month */}
+        {/* Data Management - Copy from Previous Month & Export/Import */}
         <Card className="mb-6 border-blue-200 bg-blue-50">
           <CardHeader>
             <CardTitle className="text-blue-800">{t('dataManagement')}</CardTitle>
@@ -570,6 +652,23 @@ const Index = () => {
               </p>
               <Button onClick={handleCopyFromPreviousMonth} className="bg-blue-600 hover:bg-blue-700 text-white">
                 {t('copyPrevMonthButton')}
+              </Button>
+            </div>
+            <div className="mt-6 pt-4 border-t border-blue-100 flex flex-col sm:flex-row gap-2">
+              <Button onClick={handleExport} className="bg-green-600 hover:bg-green-700 text-white">
+                <Download className="h-4 w-4 mr-1" />
+                {t('exportCurrentMonth')}
+              </Button>
+              <Input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImport}
+                className="hidden"
+                accept=".json"
+              />
+              <Button onClick={() => fileInputRef.current?.click()} className="bg-blue-600 hover:bg-blue-700 text-white">
+                <Upload className="h-4 w-4 mr-1" />
+                {t('importData')}
               </Button>
             </div>
           </CardContent>

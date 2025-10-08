@@ -509,10 +509,8 @@ const Index = () => {
 
         const currentKey = getMonthKey(globalSettings.currentYear, globalSettings.currentMonth);
 
-        if (imported.month !== currentKey) {
-          showError(t('fileMonthMismatch'));
-          return;
-        }
+        // Removed the check for imported.month !== currentKey
+        // The imported data will always overwrite the currently selected month's data.
 
         if (window.confirm(t('confirmOverwrite'))) {
           const importedData: FinancialData = {

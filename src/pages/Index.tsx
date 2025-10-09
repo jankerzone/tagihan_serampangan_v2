@@ -29,7 +29,7 @@ import {
   saveUserProfile,
   getCurrentUser
 } from "@/lib/utils";
-import { Link, useNavigate } => 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { showSuccess, showError } from "@/utils/toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useTheme } from "@/App"; // Import useTheme hook from App.tsx

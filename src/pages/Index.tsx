@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { PlusCircle, Edit3, Trash2, Settings, LogOut, Upload, Download, User } from 'lucide-react';
+import { PlusCircle, Edit3, Trash2, Settings, LogOut, Upload, Download, User, Sun, Moon } from 'lucide-react';
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { 
   getMonthKey, 
@@ -32,6 +32,7 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import { showSuccess, showError } from "@/utils/toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useTheme } from "@/App"; // Import useTheme hook from App.tsx
 
 
 // Types
@@ -130,6 +131,9 @@ const Index = () => {
 
   // Ref for the hidden file input
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Use theme hook
+  const { theme, toggleTheme } = useTheme();
 
   // Load data when month/year or global settings (e.g., language) changes
   useEffect(() => {
@@ -565,51 +569,64 @@ const Index = () => {
   const savingsColors = getDerivedColorClasses(globalSettings.colors.savings || "blue-100");
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8 dark:bg-gray-900"> {/* Add dark mode background */}
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
           <div className="flex items-center gap-4">
-            <h1 className="text-xl md:text-2xl font-bold text-gray-900">{t('appName')}</h1>
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-gray-100">{t('appName')}</h1> {/* Add dark mode text color */}
           </div>
           
           <div className="flex flex-wrap items-center gap-4 mt-4 md:mt-0"> {/* Added flex-wrap for better responsiveness */}
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1">
-                <span className="text-sm font-medium text-gray-700">{t('year')}:</span>
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('year')}:</span> {/* Add dark mode text color */}
                 <Input
                   type="number"
                   value={globalSettings.currentYear}
                   onChange={(e) => handleYearChange(e.target.value)}
-                  className="w-20 h-8 text-sm"
+                  className="w-20 h-8 text-sm dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700" // Add dark mode styles
                 />
               </div>
               
               <div className="flex items-center gap-1">
-                <span className="text-sm font-medium text-gray-700">{t('month')}:</span>
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('month')}:</span> {/* Add dark mode text color */}
                 <Select value={globalSettings.currentMonth} onValueChange={handleMonthChange}>
-                  <SelectTrigger className="w-32 h-8 text-sm">
+                  <SelectTrigger className="w-32 h-8 text-sm dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700"> {/* Add dark mode styles */}
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="dark:bg-gray-800 dark:border-gray-700"> {/* Add dark mode styles */}
                     {monthNames.map(month => (
-                      <SelectItem key={month} value={month}>{month}</SelectItem>
+                      <SelectItem key={month} value={month} className="dark:hover:bg-gray-700"> {/* Add dark mode styles */}
+                        {month}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
             </div>
+
+            {/* Dark/Light Mode Toggle Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleTheme}
+              className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-xl ml-2"
+              title={theme === 'light' ? t('switchToDark') : t('switchToLight')} // Add tooltip
+            >
+              {theme === 'light' ? <Moon className="h-5 w-5 text-gray-700 dark:text-gray-300" /> : <Sun className="h-5 w-5 text-gray-700 dark:text-gray-300" />}
+            </Button>
             
             {userProfile && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2 px-3 py-2 rounded-full border border-gray-200 hover:bg-gray-100"> {/* Adjusted padding and added border/hover for visibility */}
+                  <Button variant="ghost" className="flex items-center gap-2 px-3 py-2 rounded-full border border-gray-200 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"> {/* Adjusted padding and added border/hover for visibility */}
                     <img src={userProfile.avatar} alt="User Avatar" className="h-8 w-8 rounded-full" />
-                    <span className="text-sm font-medium text-gray-700">{t('welcome', { name: userProfile.name })}</span>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('welcome', { name: userProfile.name })}</span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <DropdownMenuLabel className="font-normal">
+                <DropdownMenuContent className="w-56 dark:bg-gray-800 dark:border-gray-700" align="end" forceMount> {/* Add dark mode styles */}
+                  <DropdownMenuLabel className="font-normal dark:text-gray-100"> {/* Add dark mode styles */}
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm font-medium leading-none">{userProfile.name}</p>
                       <p className="text-xs leading-none text-muted-foreground">
@@ -617,17 +634,17 @@ const Index = () => {
                       </p>
                     </div>
                   </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate('/profile')}>
+                  <DropdownMenuSeparator className="dark:bg-gray-700" /> {/* Add dark mode styles */}
+                  <DropdownMenuItem onClick={() => navigate('/profile')} className="dark:hover:bg-gray-700 dark:text-gray-100"> {/* Add dark mode styles */}
                     <User className="mr-2 h-4 w-4" />
                     <span>{t('profile')}</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/settings')}>
+                  <DropdownMenuItem onClick={() => navigate('/settings')} className="dark:hover:bg-gray-700 dark:text-gray-100"> {/* Add dark mode styles */}
                     <Settings className="mr-2 h-4 w-4" />
                     <span>{t('settings')}</span>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout}>
+                  <DropdownMenuSeparator className="dark:bg-gray-700" /> {/* Add dark mode styles */}
+                  <DropdownMenuItem onClick={handleLogout} className="dark:hover:bg-gray-700 dark:text-gray-100"> {/* Add dark mode styles */}
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>{t('logout')}</span>
                   </DropdownMenuItem>
@@ -638,36 +655,36 @@ const Index = () => {
         </div>
 
         {/* Monthly Report */}
-        <Card className="mb-6 bg-green-50 border-green-200">
+        <Card className="mb-6 bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800"> {/* Add dark mode styles */}
           <CardHeader>
-            <CardTitle className="text-green-800 flex items-center gap-2">
+            <CardTitle className="text-green-800 flex items-center gap-2 dark:text-green-200"> {/* Add dark mode styles */}
               <span>{t('monthlyReport')}</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card className={`${incomeColors.bgColor} ${incomeColors.borderColor} border`}>
+              <Card className={`${incomeColors.bgColor} ${incomeColors.borderColor} border dark:bg-opacity-20 dark:border-opacity-50`}> {/* Add dark mode styles */}
                 <CardContent className="p-4">
                   <div className={`text-sm font-medium ${incomeColors.textColor}`}>{t('totalIncome')}</div>
                   <div className={`text-xl font-bold ${incomeColors.textColor}`}>{formatCurrency(totalIncome)}</div>
                 </CardContent>
               </Card>
               
-              <Card className={`${budgetedColors.bgColor} ${budgetedColors.borderColor} border`}>
+              <Card className={`${budgetedColors.bgColor} ${budgetedColors.borderColor} border dark:bg-opacity-20 dark:border-opacity-50`}> {/* Add dark mode styles */}
                 <CardContent className="p-4">
                   <div className={`text-sm font-medium ${budgetedColors.textColor}`}>{t('budgetedExpenses')}</div>
                   <div className={`text-xl font-bold ${budgetedColors.textColor}`}>{formatCurrency(totalBudgetedExpenses)}</div>
                 </CardContent>
               </Card>
               
-              <Card className={`${spendingColors.bgColor} ${spendingColors.borderColor} border`}>
+              <Card className={`${spendingColors.bgColor} ${spendingColors.borderColor} border dark:bg-opacity-20 dark:border-opacity-50`}> {/* Add dark mode styles */}
                 <CardContent className="p-4">
                   <div className={`text-sm font-medium ${spendingColors.textColor}`}>{t('spending', { month: globalSettings.currentMonth })}</div>
                   <div className={`text-xl font-bold ${spendingColors.textColor}`}>{formatCurrency(totalSpending)}</div>
                 </CardContent>
               </Card>
               
-              <Card className={`${savingsColors.bgColor} ${savingsColors.borderColor} border`}>
+              <Card className={`${savingsColors.bgColor} ${savingsColors.borderColor} border dark:bg-opacity-20 dark:border-opacity-50`}> {/* Add dark mode styles */}
                 <CardContent className="p-4">
                   <div className={`text-sm font-medium ${savingsColors.textColor}`}>{t('savings', { month: globalSettings.currentMonth })}</div>
                   <div className={`text-xl font-bold ${savingsColors.textColor}`}>{formatCurrency(totalSavingsAmount)}</div>
@@ -678,20 +695,20 @@ const Index = () => {
         </Card>
 
         {/* Data Management - Copy from Previous Month & Export/Import */}
-        <Card className="mb-6 border-blue-200 bg-blue-50">
+        <Card className="mb-6 border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800"> {/* Add dark mode styles */}
           <CardHeader>
-            <CardTitle className="text-blue-800">{t('dataManagement')}</CardTitle>
+            <CardTitle className="text-blue-800 dark:text-blue-200">{t('dataManagement')}</CardTitle> {/* Add dark mode styles */}
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-gray-300"> {/* Add dark mode styles */}
                 {t('copyPrevMonthDesc')}
               </p>
               <Button onClick={handleCopyFromPreviousMonth} className="bg-blue-600 hover:bg-blue-700 text-white">
                 {t('copyPrevMonthButton')}
               </Button>
             </div>
-            <div className="mt-6 pt-4 border-t border-blue-100 flex flex-col sm:flex-row gap-2">
+            <div className="mt-6 pt-4 border-t border-blue-100 dark:border-blue-700 flex flex-col sm:flex-row gap-2"> {/* Add dark mode styles */}
               <Button onClick={handleExport} className="bg-green-600 hover:bg-green-700 text-white">
                 <Download className="h-4 w-4 mr-1" />
                 {t('exportCurrentMonth')}
@@ -716,38 +733,40 @@ const Index = () => {
           {/* Left Column - Income & Savings */}
           <div className="lg:col-span-1 space-y-6">
             {/* Income Sources */}
-            <Card>
+            <Card className="dark:bg-gray-800 dark:border-gray-700"> {/* Add dark mode styles */}
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>{t('incomeSources')}</CardTitle>
+                <CardTitle className="dark:text-gray-100">{t('incomeSources')}</CardTitle> {/* Add dark mode styles */}
                 <Dialog open={isAddIncomeOpen} onOpenChange={setIsAddIncomeOpen}>
                   <DialogTrigger asChild>
-                    <Button size="sm" variant="outline">
+                    <Button size="sm" variant="outline" className="dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600 dark:hover:bg-gray-600"> {/* Add dark mode styles */}
                       <PlusCircle className="h-4 w-4 mr-1" />
                       {t('add')}
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent className="dark:bg-gray-800 dark:border-gray-700"> {/* Add dark mode styles */}
                     <DialogHeader>
-                      <DialogTitle>{t('addIncomeSource')}</DialogTitle>
+                      <DialogTitle className="dark:text-gray-100">{t('addIncomeSource')}</DialogTitle> {/* Add dark mode styles */}
                     </DialogHeader>
                     <div className="space-y-4">
                       <div>
-                        <Label htmlFor="incomeName">{t('name')}</Label>
+                        <Label htmlFor="incomeName" className="dark:text-gray-300">{t('name')}</Label> {/* Add dark mode styles */}
                         <Input
                           id="incomeName"
                           value={newIncome.name}
                           onChange={(e) => setNewIncome({...newIncome, name: e.target.value})}
                           placeholder="e.g., Gaji Bulanan"
+                          className="dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600" {/* Add dark mode styles */}
                         />
                       </div>
                       <div>
-                        <Label htmlFor="incomeAmount">{t('amount')} (Rp)</Label>
+                        <Label htmlFor="incomeAmount" className="dark:text-gray-300">{t('amount')} (Rp)</Label> {/* Add dark mode styles */}
                         <Input
                           id="incomeAmount"
                           type="number"
                           value={newIncome.amount}
                           onChange={(e) => setNewIncome({...newIncome, amount: e.target.value})}
                           placeholder="e.g., 10000000"
+                          className="dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600" {/* Add dark mode styles */}
                         />
                       </div>
                       <Button onClick={handleAddIncome} className="w-full">{t('addIncomeSource')}</Button>
@@ -757,26 +776,27 @@ const Index = () => {
               </CardHeader>
               <CardContent>
                 {data.incomeSources.length === 0 ? (
-                  <p className="text-gray-500 text-center py-4">{t('noIncomeSources')}</p>
+                  <p className="text-gray-500 text-center py-4 dark:text-gray-400">{t('noIncomeSources')}</p> {/* Add dark mode styles */}
                 ) : (
                   <Table>
                     <TableHeader>
-                      <TableRow>
-                        <TableHead>{t('name')}</TableHead>
-                        <TableHead>{t('amount')}</TableHead>
-                        <TableHead className="w-16">{t('actions')}</TableHead>
+                      <TableRow className="dark:border-gray-700"> {/* Add dark mode styles */}
+                        <TableHead className="dark:text-gray-300">{t('name')}</TableHead> {/* Add dark mode styles */}
+                        <TableHead className="dark:text-gray-300">{t('amount')}</TableHead> {/* Add dark mode styles */}
+                        <TableHead className="w-16 dark:text-gray-300">{t('actions')}</TableHead> {/* Add dark mode styles */}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {data.incomeSources.map((income) => (
-                        <TableRow key={income.id}>
-                          <TableCell className="font-medium">{income.name}</TableCell>
-                          <TableCell>{formatCurrency(income.amount)}</TableCell>
+                        <TableRow key={income.id} className="dark:border-gray-700"> {/* Add dark mode styles */}
+                          <TableCell className="font-medium dark:text-gray-100">{income.name}</TableCell> {/* Add dark mode styles */}
+                          <TableCell className="dark:text-gray-100">{formatCurrency(income.amount)}</TableCell> {/* Add dark mode styles */}
                           <TableCell>
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => handleDeleteItem('income', income.id)}
+                              className="dark:hover:bg-gray-700" {/* Add dark mode styles */}
                             >
                               <Trash2 className="h-4 w-4 text-red-500" />
                             </Button>
@@ -790,41 +810,41 @@ const Index = () => {
             </Card>
 
             {/* Savings */}
-            <Card>
+            <Card className="dark:bg-gray-800 dark:border-gray-700"> {/* Add dark mode styles */}
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>{t('savingsTitle')}</CardTitle>
+                <CardTitle className="dark:text-gray-100">{t('savingsTitle')}</CardTitle> {/* Add dark mode styles */}
                 <Dialog open={isAddSavingOpen} onOpenChange={setIsAddSavingOpen}>
                   <DialogTrigger asChild>
-                    <Button size="sm" variant="outline">
+                    <Button size="sm" variant="outline" className="dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600 dark:hover:bg-gray-600"> {/* Add dark mode styles */}
                       <PlusCircle className="h-4 w-4 mr-1" />
                       {t('add')}
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent className="dark:bg-gray-800 dark:border-gray-700"> {/* Add dark mode styles */}
                     <DialogHeader>
-                      <DialogTitle>{t('addSaving')}</DialogTitle>
+                      <DialogTitle className="dark:text-gray-100">{t('addSaving')}</DialogTitle> {/* Add dark mode styles */}
                     </DialogHeader>
                     <div className="space-y-4">
                       <div>
-                        <Label htmlFor="savingType">{t('savingType')}</Label>
+                        <Label htmlFor="savingType" className="dark:text-gray-300">{t('savingType')}</Label> {/* Add dark mode styles */}
                         <Select
                           value={newSaving.type}
                           onValueChange={(value: SavingType) => setNewSaving(prev => ({ ...prev, type: value, amount: 0, quantity: 0, pricePerUnit: 0, unit: '', ticker: '' }))}
                         >
-                          <SelectTrigger id="savingType">
+                          <SelectTrigger id="savingType" className="dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"> {/* Add dark mode styles */}
                             <SelectValue placeholder={t('savingType')} />
                           </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="money">{t('money')}</SelectItem>
-                            <SelectItem value="gold">{t('gold')}</SelectItem>
-                            <SelectItem value="crypto">{t('crypto')}</SelectItem>
-                            <SelectItem value="stock">{t('stock')}</SelectItem>
+                          <SelectContent className="dark:bg-gray-800 dark:border-gray-700"> {/* Add dark mode styles */}
+                            <SelectItem value="money" className="dark:hover:bg-gray-700">{t('money')}</SelectItem> {/* Add dark mode styles */}
+                            <SelectItem value="gold" className="dark:hover:bg-gray-700">{t('gold')}</SelectItem> {/* Add dark mode styles */}
+                            <SelectItem value="crypto" className="dark:hover:bg-gray-700">{t('crypto')}</SelectItem> {/* Add dark mode styles */}
+                            <SelectItem value="stock" className="dark:hover:bg-gray-700">{t('stock')}</SelectItem> {/* Add dark mode styles */}
                           </SelectContent>
                         </Select>
                       </div>
 
                       <div>
-                        <Label htmlFor="savingName">{t('name')}</Label>
+                        <Label htmlFor="savingName" className="dark:text-gray-300">{t('name')}</Label> {/* Add dark mode styles */}
                         <Input
                           id="savingName"
                           value={newSaving.name}
@@ -835,18 +855,20 @@ const Index = () => {
                             newSaving.type === 'crypto' ? t('enterCryptoName') :
                             newSaving.type === 'stock' ? t('enterStockName') : ''
                           }
+                          className="dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600" {/* Add dark mode styles */}
                         />
                       </div>
 
                       {newSaving.type === 'money' && (
                         <div>
-                          <Label htmlFor="savingAmount">{t('amount')} (Rp)</Label>
+                          <Label htmlFor="savingAmount" className="dark:text-gray-300">{t('amount')} (Rp)</Label> {/* Add dark mode styles */}
                           <Input
                             id="savingAmount"
                             type="number"
                             value={newSaving.amount === 0 ? '' : newSaving.amount}
                             onChange={(e) => setNewSaving({...newSaving, amount: parseFloat(e.target.value) || 0})}
                             placeholder="e.g., 2000000"
+                            className="dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600" {/* Add dark mode styles */}
                           />
                         </div>
                       )}
@@ -855,43 +877,47 @@ const Index = () => {
                         <>
                           {newSaving.type !== 'gold' && ( // Gold doesn't need a ticker, unit is always grams
                             <div>
-                              <Label htmlFor="savingTicker">{t('ticker')}</Label>
+                              <Label htmlFor="savingTicker" className="dark:text-gray-300">{t('ticker')}</Label> {/* Add dark mode styles */}
                               <Input
                                 id="savingTicker"
                                 value={newSaving.ticker}
                                 onChange={(e) => setNewSaving({...newSaving, ticker: e.target.value, unit: e.target.value})}
                                 placeholder={t('enterTicker')}
+                                className="dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600" {/* Add dark mode styles */}
                               />
                             </div>
                           )}
                           <div>
-                            <Label htmlFor="savingQuantity">{t('quantity')}</Label>
+                            <Label htmlFor="savingQuantity" className="dark:text-gray-300">{t('quantity')}</Label> {/* Add dark mode styles */}
                             <Input
                               id="savingQuantity"
                               // type="number" // Removed type="number"
                               value={newSaving.quantity === 0 ? '' : newSaving.quantity}
                               onChange={(e) => setNewSaving({...newSaving, quantity: parseFloat(e.target.value) || 0})}
                               placeholder={t('enterQuantity')}
+                              className="dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600" {/* Add dark mode styles */}
                             />
                           </div>
                           <div>
-                            <Label htmlFor="savingPricePerUnit">{t('pricePerUnit')}</Label>
+                            <Label htmlFor="savingPricePerUnit" className="dark:text-gray-300">{t('pricePerUnit')}</Label> {/* Add dark mode styles */}
                             <Input
                               id="savingPricePerUnit"
                               // type="number" // Removed type="number"
                               value={newSaving.pricePerUnit === 0 ? '' : newSaving.pricePerUnit}
                               onChange={(e) => setNewSaving({...newSaving, pricePerUnit: parseFloat(e.target.value) || 0})}
                               placeholder={t('enterPricePerUnit')}
+                              className="dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600" {/* Add dark mode styles */}
                             />
                           </div>
                           <div>
-                            <Label htmlFor="savingUnit">{t('unit')}</Label>
+                            <Label htmlFor="savingUnit" className="dark:text-gray-300">{t('unit')}</Label> {/* Add dark mode styles */}
                             <Input
                               id="savingUnit"
                               value={newSaving.unit || (newSaving.type === 'gold' ? t('grams') : newSaving.type === 'stock' ? t('shares') : newSaving.ticker || '')}
                               onChange={(e) => setNewSaving({...newSaving, unit: e.target.value})}
                               placeholder={newSaving.type === 'gold' ? t('grams') : newSaving.type === 'stock' ? t('shares') : t('unit')}
                               disabled={newSaving.type === 'gold' || newSaving.type === 'stock'} // Disable for gold/stock as unit is fixed
+                              className="dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600" {/* Add dark mode styles */}
                             />
                           </div>
                         </>
@@ -903,38 +929,39 @@ const Index = () => {
               </CardHeader>
               <CardContent>
                 {data.savingList.length === 0 ? (
-                  <p className="text-gray-500 text-center py-4">{t('noSavings')}</p>
+                  <p className="text-gray-500 text-center py-4 dark:text-gray-400">{t('noSavings')}</p> {/* Add dark mode styles */}
                 ) : (
                   <Table>
                     <TableHeader>
-                      <TableRow>
-                        <TableHead>{t('name')}</TableHead>
-                        <TableHead>{t('type')}</TableHead>
-                        <TableHead>{t('amount')}</TableHead>
-                        <TableHead className="w-16">{t('actions')}</TableHead>
+                      <TableRow className="dark:border-gray-700"> {/* Add dark mode styles */}
+                        <TableHead className="dark:text-gray-300">{t('name')}</TableHead> {/* Add dark mode styles */}
+                        <TableHead className="dark:text-gray-300">{t('type')}</TableHead> {/* Add dark mode styles */}
+                        <TableHead className="dark:text-gray-300">{t('amount')}</TableHead> {/* Add dark mode styles */}
+                        <TableHead className="w-16 dark:text-gray-300">{t('actions')}</TableHead> {/* Add dark mode styles */}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {data.savingList.map((saving) => (
-                        <TableRow key={saving.id}>
-                          <TableCell className="font-medium">
+                        <TableRow key={saving.id} className="dark:border-gray-700"> {/* Add dark mode styles */}
+                          <TableCell className="font-medium dark:text-gray-100">
                             {saving.name}
                             {saving.type !== 'money' && saving.quantity && saving.pricePerUnit && (
-                              <div className="text-xs text-gray-500">
+                              <div className="text-xs text-gray-500 dark:text-gray-400"> {/* Add dark mode styles */}
                                 {saving.quantity} {saving.unit} @ {formatCurrency(saving.pricePerUnit)}
                                 {saving.ticker && ` (${saving.ticker})`}
                               </div>
                             )}
                           </TableCell>
                           <TableCell>
-                            <Badge variant="secondary">{t(saving.type)}</Badge>
+                            <Badge variant="secondary" className="dark:bg-gray-700 dark:text-gray-100">{t(saving.type)}</Badge> {/* Add dark mode styles */}
                           </TableCell>
-                          <TableCell>{formatCurrency(saving.amount)}</TableCell>
+                          <TableCell className="dark:text-gray-100">{formatCurrency(saving.amount)}</TableCell> {/* Add dark mode styles */}
                           <TableCell>
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => handleDeleteItem('saving', saving.id)}
+                              className="dark:hover:bg-gray-700" {/* Add dark mode styles */}
                             >
                               <Trash2 className="h-4 w-4 text-red-500" />
                             </Button>
@@ -950,50 +977,52 @@ const Index = () => {
 
           {/* Right Column - Budgeting List */}
           <div className="lg:col-span-2">
-            <Card>
+            <Card className="dark:bg-gray-800 dark:border-gray-700"> {/* Add dark mode styles */}
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>{t('expensesList')}</CardTitle>
+                <CardTitle className="dark:text-gray-100">{t('expensesList')}</CardTitle> {/* Add dark mode styles */}
                 <div className="flex gap-2">
                   <Dialog open={isAddBudgetOpen} onOpenChange={setIsAddBudgetOpen}>
                     <DialogTrigger asChild>
-                      <Button size="sm" variant="outline">
+                      <Button size="sm" variant="outline" className="dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600 dark:hover:bg-gray-600"> {/* Add dark mode styles */}
                         <PlusCircle className="h-4 w-4 mr-1" />
                         {t('add')}
                       </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="dark:bg-gray-800 dark:border-gray-700"> {/* Add dark mode styles */}
                       <DialogHeader>
-                        <DialogTitle>{t('addBudgetItem')}</DialogTitle>
+                        <DialogTitle className="dark:text-gray-100">{t('addBudgetItem')}</DialogTitle> {/* Add dark mode styles */}
                       </DialogHeader>
                       <div className="space-y-4">
                         <div>
-                          <Label htmlFor="budgetName">{t('name')}</Label>
+                          <Label htmlFor="budgetName" className="dark:text-gray-300">{t('name')}</Label> {/* Add dark mode styles */}
                           <Input
                             id="budgetName"
                             value={newBudget.name}
                             onChange={(e) => setNewBudget({...newBudget, name: e.target.value})}
                             placeholder="e.g., Zakat Wajib"
+                            className="dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600" {/* Add dark mode styles */}
                           />
                         </div>
                         <div>
-                          <Label htmlFor="budgetAllocation">{t('allocation')} (Rp)</Label>
+                          <Label htmlFor="budgetAllocation" className="dark:text-gray-300">{t('allocation')} (Rp)</Label> {/* Add dark mode styles */}
                           <Input
                             id="budgetAllocation"
                             type="number"
                             value={newBudget.allocation}
                             onChange={(e) => setNewBudget({...newBudget, allocation: e.target.value})}
                             placeholder="e.g., 325000"
+                            className="dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600" {/* Add dark mode styles */}
                           />
                         </div>
                         <div>
-                          <Label htmlFor="budgetCategory">{t('category')}</Label>
+                          <Label htmlFor="budgetCategory" className="dark:text-gray-300">{t('category')}</Label> {/* Add dark mode styles */}
                           <Select value={newBudget.category} onValueChange={(value) => setNewBudget({...newBudget, category: value})}>
-                            <SelectTrigger>
+                            <SelectTrigger className="dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"> {/* Add dark mode styles */}
                               <SelectValue />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="dark:bg-gray-800 dark:border-gray-700"> {/* Add dark mode styles */}
                               {globalSettings.categories.map(category => (
-                                <SelectItem key={category} value={category}>{category}</SelectItem>
+                                <SelectItem key={category} value={category} className="dark:hover:bg-gray-700">{category}</SelectItem> {/* Add dark mode styles */}
                               ))}
                             </SelectContent>
                           </Select>
@@ -1006,22 +1035,23 @@ const Index = () => {
                   {/* Bulk Add Expenses Dialog */}
                   <Dialog open={isBulkAddBudgetOpen} onOpenChange={setIsBulkAddBudgetOpen}>
                     <DialogTrigger asChild>
-                      <Button size="sm" variant="outline">
+                      <Button size="sm" variant="outline" className="dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600 dark:hover:bg-gray-600"> {/* Add dark mode styles */}
                         <Upload className="h-4 w-4 mr-1" />
                         {t('bulkAddExpenses')}
                       </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="dark:bg-gray-800 dark:border-gray-700"> {/* Add dark mode styles */}
                       <DialogHeader>
-                        <DialogTitle>{t('bulkAddExpenses')}</DialogTitle>
+                        <DialogTitle className="dark:text-gray-100">{t('bulkAddExpenses')}</DialogTitle> {/* Add dark mode styles */}
                       </DialogHeader>
                       <div className="space-y-4">
-                        <p className="text-sm text-gray-600">{t('bulkAddExpensesDescription')}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">{t('bulkAddExpensesDescription')}</p> {/* Add dark mode styles */}
                         <Textarea
                           value={bulkBudgetData}
                           onChange={(e) => setBulkBudgetData(e.target.value)}
                           placeholder={t('pasteExcelData')}
                           rows={10}
+                          className="dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600" {/* Add dark mode styles */}
                         />
                         <Button onClick={handleBulkAddBudget} className="w-full">{t('bulkAddButton')}</Button>
                       </div>
@@ -1040,16 +1070,16 @@ const Index = () => {
                         {t('bulkSetRealization')}
                       </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="dark:bg-gray-800 dark:border-gray-700"> {/* Add dark mode styles */}
                       <DialogHeader>
-                        <DialogTitle>{t('bulkSetRealization')}</DialogTitle>
+                        <DialogTitle className="dark:text-gray-100">{t('bulkSetRealization')}</DialogTitle> {/* Add dark mode styles */}
                       </DialogHeader>
                       <div className="space-y-4">
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-gray-600 dark:text-gray-300"> {/* Add dark mode styles */}
                           {t('setRealizationForAll', { count: data.budgetingList.length })}
                         </p>
                         <div>
-                          <Label htmlFor="bulkPercentage">{t('percentage')}</Label>
+                          <Label htmlFor="bulkPercentage" className="dark:text-gray-300">{t('percentage')}</Label> {/* Add dark mode styles */}
                           <div className="flex items-center gap-2">
                             <Input
                               id="bulkPercentage"
@@ -1059,7 +1089,7 @@ const Index = () => {
                               placeholder="100"
                               min="0"
                               max="100"
-                              className="w-full border rounded p-2"
+                              className="w-full border rounded p-2 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600" {/* Add dark mode styles */}
                             />
                             <Button 
                               size="sm" 
@@ -1070,7 +1100,7 @@ const Index = () => {
                             </Button>
                           </div>
                         </div>
-                        <div className="text-sm text-gray-600 italic">
+                        <div className="text-sm text-gray-600 italic dark:text-gray-400"> {/* Add dark mode styles */}
                           {t('allocationTotal')}: {formatCurrency(totalBudgetedExpenses)}
                         </div>
                         <Button onClick={handleBulkRealization} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
@@ -1083,18 +1113,18 @@ const Index = () => {
               </CardHeader>
               <CardContent>
                 {data.budgetingList.length === 0 ? (
-                  <p className="text-gray-500 text-center py-4">{t('noExpenses')}</p>
+                  <p className="text-gray-500 text-center py-4 dark:text-gray-400">{t('noExpenses')}</p> {/* Add dark mode styles */}
                 ) : (
                   <Table>
                     <TableHeader>
-                      <TableRow>
-                        <TableHead>{t('name')}</TableHead>
-                        <TableHead>{t('category')}</TableHead>
-                        <TableHead className="text-right">{t('allocation')}</TableHead>
-                        <TableHead className="text-right">{t('realization')}</TableHead>
-                        <TableHead>{t('budgetUsage')}</TableHead>
-                        <TableHead className="text-right">{t('usagePercent')}</TableHead>
-                        <TableHead className="w-24">{t('actions')}</TableHead>
+                      <TableRow className="dark:border-gray-700"> {/* Add dark mode styles */}
+                        <TableHead className="dark:text-gray-300">{t('name')}</TableHead> {/* Add dark mode styles */}
+                        <TableHead className="dark:text-gray-300">{t('category')}</TableHead> {/* Add dark mode styles */}
+                        <TableHead className="text-right dark:text-gray-300">{t('allocation')}</TableHead> {/* Add dark mode styles */}
+                        <TableHead className="text-right dark:text-gray-300">{t('realization')}</TableHead> {/* Add dark mode styles */}
+                        <TableHead className="dark:text-gray-300">{t('budgetUsage')}</TableHead> {/* Add dark mode styles */}
+                        <TableHead className="text-right dark:text-gray-300">{t('usagePercent')}</TableHead> {/* Add dark mode styles */}
+                        <TableHead className="w-24 dark:text-gray-300">{t('actions')}</TableHead> {/* Add dark mode styles */}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -1104,19 +1134,19 @@ const Index = () => {
                           : 0;
                         
                         return (
-                          <TableRow key={budget.id}>
-                            <TableCell className="font-medium">{budget.name}</TableCell>
+                          <TableRow key={budget.id} className="dark:border-gray-700"> {/* Add dark mode styles */}
+                            <TableCell className="font-medium dark:text-gray-100">{budget.name}</TableCell> {/* Add dark mode styles */}
                             <TableCell>
                               <Badge 
                                 variant="secondary" 
-                                className="cursor-pointer hover:bg-gray-200"
+                                className="cursor-pointer hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600" {/* Add dark mode styles */}
                                 onClick={() => openEditCategory(budget)}
                               >
                                 {budget.category}
                               </Badge>
                             </TableCell>
-                            <TableCell className="text-right">{formatCurrency(budget.allocation)}</TableCell>
-                            <TableCell className="text-right">{formatCurrency(budget.realization)}</TableCell>
+                            <TableCell className="text-right dark:text-gray-100">{formatCurrency(budget.allocation)}</TableCell> {/* Add dark mode styles */}
+                            <TableCell className="text-right dark:text-gray-100">{formatCurrency(budget.realization)}</TableCell> {/* Add dark mode styles */}
                             <TableCell>
                               <Progress 
                                 value={Math.min(100, percentage)} 
@@ -1124,7 +1154,7 @@ const Index = () => {
                               />
                             </TableCell>
                             <TableCell className="text-right">
-                              <span className={percentage > 100 ? "text-red-600 font-bold" : ""}>
+                              <span className={percentage > 100 ? "text-red-600 font-bold" : "dark:text-gray-100"}> {/* Add dark mode styles */}
                                 {percentage.toFixed(2)}%
                               </span>
                             </TableCell>
@@ -1134,13 +1164,15 @@ const Index = () => {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => openEditRealization(budget.id, budget.realization)}
+                                  className="dark:hover:bg-gray-700" {/* Add dark mode styles */}
                                 >
-                                  <Edit3 className="h-4 w-4" />
+                                  <Edit3 className="h-4 w-4 dark:text-gray-300" /> {/* Add dark mode styles */}
                                 </Button>
                                 <Button
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => handleDeleteItem('budget', budget.id)}
+                                  className="dark:hover:bg-gray-700" {/* Add dark mode styles */}
                                 >
                                   <Trash2 className="h-4 w-4 text-red-500" />
                                 </Button>
@@ -1159,18 +1191,18 @@ const Index = () => {
 
         {/* Edit Realization Dialog */}
         <Dialog open={isEditRealizationOpen} onOpenChange={setIsEditRealizationOpen}>
-          <DialogContent>
+          <DialogContent className="dark:bg-gray-800 dark:border-gray-700"> {/* Add dark mode styles */}
             <DialogHeader>
-              <DialogTitle>{t('editRealization')}</DialogTitle>
+              <DialogTitle className="dark:text-gray-100">{t('editRealization')}</DialogTitle> {/* Add dark mode styles */}
             </DialogHeader>
             <div className="space-y-4">
               {selectedBudget && (
-                <div className="text-sm text-gray-600 italic">
+                <div className="text-sm text-gray-600 italic dark:text-gray-400"> {/* Add dark mode styles */}
                   Allocation: {formatCurrency(selectedBudget.allocation)}
                 </div>
               )}
               <div>
-                <Label htmlFor="realizationAmount">{t('realizationAmount')}</Label>
+                <Label htmlFor="realizationAmount" className="dark:text-gray-300">{t('realizationAmount')}</Label> {/* Add dark mode styles */}
                 <div className="flex gap-2">
                   <Input
                     id="realizationAmount"
@@ -1178,7 +1210,7 @@ const Index = () => {
                     value={newRealization}
                     onChange={(e) => setNewRealization(e.target.value)}
                     placeholder="e.g., 325000"
-                    className="flex-1"
+                    className="flex-1 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600" {/* Add dark mode styles */}
                   />
                   <Button 
                     size="sm" 
@@ -1196,28 +1228,28 @@ const Index = () => {
 
         {/* Edit Category Dialog */}
         <Dialog open={isEditCategoryOpen} onOpenChange={setIsEditCategoryOpen}>
-          <DialogContent>
+          <DialogContent className="dark:bg-gray-800 dark:border-gray-700"> {/* Add dark mode styles */}
             <DialogHeader>
-              <DialogTitle>{t('editCategory')}</DialogTitle>
+              <DialogTitle className="dark:text-gray-100">{t('editCategory')}</DialogTitle> {/* Add dark mode styles */}
             </DialogHeader>
             <div className="space-y-4">
               {selectedBudgetItemForCategoryEdit && (
-                <div className="text-sm text-gray-600 italic mb-2">
+                <div className="text-sm text-gray-600 italic mb-2 dark:text-gray-400"> {/* Add dark mode styles */}
                   {t('name')}: {selectedBudgetItemForCategoryEdit.name}
                 </div>
               )}
               <div>
-                <Label htmlFor="newCategoryForBudgetItem">{t('category')}</Label>
+                <Label htmlFor="newCategoryForBudgetItem" className="dark:text-gray-300">{t('category')}</Label> {/* Add dark mode styles */}
                 <Select 
                   value={newCategoryForBudgetItem} 
                   onValueChange={setNewCategoryForBudgetItem}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"> {/* Add dark mode styles */}
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="dark:bg-gray-800 dark:border-gray-700"> {/* Add dark mode styles */}
                     {globalSettings.categories.map(category => (
-                      <SelectItem key={category} value={category}>{category}</SelectItem>
+                      <SelectItem key={category} value={category} className="dark:hover:bg-gray-700">{category}</SelectItem> {/* Add dark mode styles */}
                     ))}
                   </SelectContent>
                 </Select>

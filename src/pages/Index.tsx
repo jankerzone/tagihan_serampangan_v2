@@ -573,7 +573,7 @@ const Index = () => {
             <h1 className="text-xl md:text-2xl font-bold text-gray-900">{t('appName')}</h1>
           </div>
           
-          <div className="flex items-center gap-4 mt-4 md:mt-0">
+          <div className="flex flex-wrap items-center gap-4 mt-4 md:mt-0"> {/* Added flex-wrap for better responsiveness */}
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1">
                 <span className="text-sm font-medium text-gray-700">{t('year')}:</span>
@@ -603,9 +603,9 @@ const Index = () => {
             {userProfile && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                    <img src={userProfile.avatar} alt="Avatar" className="h-8 w-8 rounded-full" />
-                    <span className="sr-only">{t('profile')}</span>
+                  <Button variant="ghost" className="flex items-center gap-2 px-3 py-2 rounded-full border border-gray-200 hover:bg-gray-100"> {/* Adjusted padding and added border/hover for visibility */}
+                    <img src={userProfile.avatar} alt="User Avatar" className="h-8 w-8 rounded-full" />
+                    <span className="text-sm font-medium text-gray-700">{t('welcome', { name: userProfile.name })}</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end" forceMount>

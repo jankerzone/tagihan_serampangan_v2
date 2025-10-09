@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { PlusCircle, Edit3, Trash2, Settings, LogOut, Upload, Download } from 'lucide-react';
+import { PlusCircle, Edit3, Trash2, Settings, LogOut, Upload, Download, User } from 'lucide-react';
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { 
   getMonthKey, 
@@ -24,7 +24,9 @@ import {
   monthNumbers,
   copyFromPreviousMonth,
   t,
-  getPrefixedKey
+  getPrefixedKey,
+  loadUserProfile,
+  saveUserProfile
 } from "@/lib/utils";
 import { Link, useNavigate } from 'react-router-dom';
 import { showSuccess, showError } from "@/utils/toast";
@@ -87,6 +89,7 @@ const Index = () => {
   const navigate = useNavigate();
   // State
   const [globalSettings, setGlobalSettings] = useState(loadGlobalSettings());
+  const [userProfile, setUserProfile] = useState(loadUserProfile());
   const [data, setData] = useState<FinancialData>({
     incomeSources: [],
     savingList: [],
@@ -137,11 +140,14 @@ const Index = () => {
     saveGlobalSettings(globalSettings);
   }, [globalSettings]);
 
-  // Effect to listen for storage changes (for live color updates from settings page)
+  // Effect to listen for storage changes (for live color/profile updates from settings/profile page)
   useEffect(() => {
     const handleStorageChange = (event: StorageEvent) => {
       if (event.key === getPrefixedKey('tagihan_global_settings')) {
         setGlobalSettings(loadGlobalSettings());
+      }
+      if (event.key === getPrefixedKey('user_profile')) {
+        setUserProfile(loadUserProfile());
       }
     };
 
@@ -539,6 +545,12 @@ const Index = () => {
   const handleLogout = () => {
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('currentUser');
+    // Clear all user-specific data by iterating through prefixed keys if necessary,
+    // or simply rely on the next login to re-initialize.
+    // For now, we'll clear the specific keys we know.
+    localStorage.removeItem(getPrefixedKey('tagihan_global_settings'));
+    localStorage.removeItem(getPrefixedKey('tagihan_data'));
+    localStorage.removeItem(getPrefixedKey('user_profile'));
     navigate('/login');
   };
 
@@ -559,6 +571,13 @@ const Index = () => {
           </div>
           
           <div className="flex items-center gap-4 mt-4 md:mt-0">
+            {userProfile && (
+              <div className="flex items-center gap-2">
+                <img src={userProfile.avatar} alt="Avatar" className="w-8 h-8 rounded-full" />
+                <span className="text-sm font-medium text-gray-700">{t('welcome', { name: userProfile.name })}</span>
+              </div>
+            )}
+
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1">
                 <span className="text-sm font-medium text-gray-700">{t('year')}:</span>
@@ -585,6 +604,12 @@ const Index = () => {
               </div>
             </div>
             
+            <Link to="/profile">
+              <Button variant="outline" size="sm">
+                <User className="h-4 w-4 mr-1" />
+                {t('profile')}
+              </Button>
+            </Link>
             <Link to="/settings">
               <Button variant="outline" size="sm">
                 <Settings className="h-4 w-4 mr-1" />

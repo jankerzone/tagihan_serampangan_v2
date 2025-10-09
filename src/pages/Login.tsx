@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { hashPassword, checkPassword, t, loadUsers, saveUsers } from "@/lib/utils";
+import { hashPassword, checkPassword, t, loadUsers, saveUsers, loadUserProfile, saveUserProfile, getPrefixedKey } from "@/lib/utils";
 import { showSuccess, showError } from "@/utils/toast";
 
 const Login = () => {
@@ -23,6 +23,15 @@ const Login = () => {
       setIsRegistering(true);
     }
   }, [users]);
+
+  const initializeUserProfile = (user: string) => {
+    const userProfileKey = getPrefixedKey('user_profile');
+    const existingProfile = localStorage.getItem(userProfileKey);
+    if (!existingProfile) {
+      const defaultAvatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${user}`;
+      saveUserProfile({ name: user, avatar: defaultAvatar });
+    }
+  };
 
   const handleRegister = () => {
     if (!username || !password || (isRegistering && !confirmPassword)) {
@@ -46,6 +55,7 @@ const Login = () => {
       
       localStorage.setItem('isLoggedIn', 'true');
       localStorage.setItem('currentUser', username);
+      initializeUserProfile(username); // Initialize profile for new user
       showSuccess(t('passwordSetSuccess'));
       navigate('/');
     } catch (error) {
@@ -65,6 +75,7 @@ const Login = () => {
     if (storedHash && checkPassword(password, storedHash)) {
       localStorage.setItem('isLoggedIn', 'true');
       localStorage.setItem('currentUser', username);
+      initializeUserProfile(username); // Ensure profile is initialized on login
       showSuccess("Login successful!"); // Using a generic success message for login
       navigate('/');
     } else {

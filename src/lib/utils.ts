@@ -77,6 +77,37 @@ export function saveGlobalSettings(settings: any) {
   localStorage.setItem(getPrefixedKey('tagihan_global_settings'), JSON.stringify(settings));
 }
 
+// User Profile Management
+interface UserProfile {
+  name: string;
+  avatar: string;
+}
+
+export function loadUserProfile(): UserProfile | null {
+  const currentUser = getCurrentUser();
+  if (!currentUser) return null;
+  try {
+    const profile = localStorage.getItem(getPrefixedKey('user_profile'));
+    return profile ? JSON.parse(profile) : null;
+  } catch (error) {
+    console.error('Error loading user profile:', error);
+    return null;
+  }
+}
+
+export function saveUserProfile(profile: UserProfile) {
+  const currentUser = getCurrentUser();
+  if (!currentUser) {
+    console.error('No current user to save profile for.');
+    return;
+  }
+  try {
+    localStorage.setItem(getPrefixedKey('user_profile'), JSON.stringify(profile));
+  } catch (error) {
+    console.error('Error saving user profile:', error);
+  }
+}
+
 // Load month data
 export function loadMonthData(key: string) {
   try {

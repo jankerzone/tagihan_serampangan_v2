@@ -26,10 +26,13 @@ import {
   t,
   getPrefixedKey,
   loadUserProfile,
-  saveUserProfile
+  saveUserProfile,
+  getCurrentUser
 } from "@/lib/utils";
 import { Link, useNavigate } from 'react-router-dom';
 import { showSuccess, showError } from "@/utils/toast";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+
 
 // Types
 interface IncomeSource {
@@ -567,17 +570,10 @@ const Index = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
           <div className="flex items-center gap-4">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{t('appName')}</h1>
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900">{t('appName')}</h1>
           </div>
           
           <div className="flex items-center gap-4 mt-4 md:mt-0">
-            {userProfile && (
-              <div className="flex items-center gap-2">
-                <img src={userProfile.avatar} alt="Avatar" className="w-8 h-8 rounded-full" />
-                <span className="text-sm font-medium text-gray-700">{t('welcome', { name: userProfile.name })}</span>
-              </div>
-            )}
-
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1">
                 <span className="text-sm font-medium text-gray-700">{t('year')}:</span>
@@ -604,22 +600,40 @@ const Index = () => {
               </div>
             </div>
             
-            <Link to="/profile">
-              <Button variant="outline" size="sm">
-                <User className="h-4 w-4 mr-1" />
-                {t('profile')}
-              </Button>
-            </Link>
-            <Link to="/settings">
-              <Button variant="outline" size="sm">
-                <Settings className="h-4 w-4 mr-1" />
-                {t('settings')}
-              </Button>
-            </Link>
-            <Button variant="outline" size="sm" onClick={handleLogout}>
-              <LogOut className="h-4 w-4 mr-1" />
-              {t('logout')}
-            </Button>
+            {userProfile && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <img src={userProfile.avatar} alt="Avatar" className="h-8 w-8 rounded-full" />
+                    <span className="sr-only">{t('profile')}</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">{userProfile.name}</p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {getCurrentUser()}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate('/profile')}>
+                    <User className="mr-2 h-4 w-4" />
+                    <span>{t('profile')}</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/settings')}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>{t('settings')}</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>{t('logout')}</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </div>
 
